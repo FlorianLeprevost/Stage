@@ -68,6 +68,7 @@ if hb_detect ~= 'n'
         stats.RT(n) = interv_RT(n);
         stats.PR(n) = interv_PR(n);
         stats.QR(n) = interv_QR(n);
+        stats.x_spectre(n) = R(n) + interv_RR(n)/2;
     end
     
     %creation de l'"event_file" ET supprimer les trials outliers
@@ -109,10 +110,7 @@ if hb_detect ~= 'n'
     trl(:,3) = -interval_pre*sample_rate
     save(['data_' patient_number '_' macro_name], 'trl', '-append')
     save([patient_number '_Heart_info'], 'trl', '-append')
-    
-    %ibi time series
-    
-    
+
 end
 
 
