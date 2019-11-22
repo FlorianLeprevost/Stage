@@ -13,7 +13,7 @@
 %V2 Florian Leprévost October 2019
 %florian.leprevost@gmail.com 
 
-
+%% use stats var (voir pipeline_florian) to plot distrbution of interval
 figure
 boxplot(transpose(stats.RR),'Labels', {'RR'})
 title('Distribution des intervalles RR')
@@ -26,7 +26,6 @@ figure
 boxplot([transpose(stats.QR),transpose(stats.PR),transpose(stats.RT)],'Labels', {'QR', 'PR', 'RT'})
 title('Distribution des intervalles QR, PR et RT')
 
-
 figure
 histogram(transpose(stats.RT))
 hold on
@@ -37,11 +36,10 @@ title('Distribution des intervalles QR, PR et RT')
 
 %spectre RR
 figure
-plot(1:length(interv_RR), interv_RR)
+plot(stats.x_spectre, stats.RR)
 
-save(['data_' patient_number '_stats' ], 'interv_RR', 'interv_RT', 'interv_PR' ,'interv_QR')
+
 pause
-
 %%
 %en supprimant les trials qui depasse la moyenne + 5*sd à au moins un sample
 %get outliers
@@ -100,23 +98,6 @@ for n=1:length(labels)
     plot(data_final_trials.time, trials_str(n).data)
 end
 save(['data_' patient_number '_stats' ], 'trials_str','bad_trials_ok', '-append')
-%%
-%creation de l'"event_file" ET supprimer les trials outliers
-ibi = transpose(interv_RR)
-%ibi post --> rajouter nan dernier trial 
-ibi_post = [ibi;NaN]
-%ibi pré n-1 --> rajouter nan premier trial
-ibi_pre= [NaN;ibi]
-%diff ibi
-diff_ibi = diff(ibi)
-diff_ibi= [NaN;diff_ibi;NaN]
-
-%ajouter les interval a l'envent structure
-for n = 1:length(ibi_pre);
-    event_ok(n).pre  = ibi_pre(n)
-    event_ok(n).post = ibi_post(n)
-    event_ok(n).diff = diff_ibi(n)
-end
 
 %ET supprimer les trials outliers
 ibi_post(bad_trials_ok) = []
