@@ -1,3 +1,10 @@
+%blabla
+%blabla
+
+%%ITC
+%
+
+
 % spectral analysis
 data = clean_trials
 
@@ -41,3 +48,19 @@ axis xy
 title('inter-trial linear coherence'+ string(char(itc.label(2))));
 
 save(['data_' patient_number '_' macro_name '_stats' ], 'itc', '-append')
+
+%% spectral ana
+data = clean_trials
+
+cfg              = [];
+cfg.output       = 'pow';
+cfg.channel      = 'OpPC_2-OpPC_3';
+cfg.method       = 'mtmconvol';
+cfg.taper        = 'hanning';
+cfg.foi          = 2:2:30;                         % analysis 2 to 30 Hz in steps of 2 Hz
+cfg.t_ftimwin    = ones(length(cfg.foi),1).*0.5;   % length of time window = 0.5 sec
+cfg.toi          = -1:0.05:1;                      % the time window "slides" from -0.5 to 1.5 in 0.05 sec steps
+TFRhann_oppc23 = ft_freqanalysis(cfg, data);    
+
+
+ft_singleplotTFR(cfg, TFRhann_oppc23)
