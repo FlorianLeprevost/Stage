@@ -15,12 +15,9 @@
 %florian.leprevost@gmail.com 
 %%
 
-clear all
-close all
-
 %remplit les variables nécessaires pour l'extraction Read_iEEG
-macro_name ='OpF3'
-nb_plots = 7
+macro_name ='PrCi'
+nb_plots = 4
 patient_number= '2476'
 recording_date='2017-04-07'
 recording_time = '14-45'
@@ -34,7 +31,7 @@ high_pass = 0.5
 %% lance heart_peak_detect et crée event+trl file SI nécessaire
 % (Sinon il faut avoir  dans son workspace les variables HeartBeats, event_ok, trl)
 
-hb_detect = input('Do you need to extract the heart signal or do you already have the PQRST table (HeartBeat), the event file (event_ok) and the trl file (trl)? If no type n (between apostrophes), if yes give the channel name (ex ECG3).')
+hb_detect = input('Do you need to extract the heart signal ?\nOr do you already have the PQRST table (HeartBeat), the event file (event_ok) and the trl file (trl)?\nIf no type n (between apostrophes), if yes give the channel name (ex ECG3).')
 if hb_detect ~= 'n'
     elec_name{1}=['0' patient_number '_' recording_date '_' recording_time '_' hb_detect '_' num2str(n) '.ncs']
     data_coeur = Read_iEEG_data(patient_number, recording_date, recording_time, elec_name, experiment)
