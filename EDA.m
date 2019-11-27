@@ -47,8 +47,18 @@ pause
 %get outliers
 clean_trials = data_final_trials;
 labels = string(data_final_trials.label);
-% var = data_final_average.var;
-% avg = data_final_average.avg;
+
+%remove sample index
+rmv_ind=[]
+for n=1:(length(labels))
+    if labels(n) ~= 'sampleindex'
+        rmv_ind{n} = char(labels(n))
+    end
+end
+cfg = []
+cfg.channel = rmv_ind
+clean_trials = ft_selectdata(cfg, clean_trials)
+labels = string(clean_trials.label)
 
 % test visuellement quelle mesure prendre pour outliers
 for n=1:length(labels)
@@ -142,13 +152,13 @@ nb_bins = input('how many bins?')
 name_test =[]
 for tri = 1:3
     if tri == 1
-        var = ibi_post
+        var = transpose(ibi_post)
         name_test = 'interval to Next IBI'
     elseif tri == 2
-        var = ibi_pre
+        var = transpose(ibi_pre)
         name_test = 'interval to Previous IBI'
     elseif tri==3 
-        var= diff_ibi
+        var= transpose(diff_ibi)
         name_test = 'difference of previous and next interval '
     end
 
@@ -164,7 +174,7 @@ for tri = 1:3
     fcolor = figure('Name', ['colors' + string(name_test)])
     
     for dip = 1:length(labels)
-        channel = clean_trials(:,dip,:);
+        channel = squeeze(clean_trials.trial(:,dip,:));
         label =labels(dip);
         %rajoute la colonne d'ordre dans sorted trials
         channel(:,nb_col+1:nb_col+3) = sorted_var(:,1:3);
@@ -221,7 +231,7 @@ for tri = 1:3
         %title('All trials of ' + string(label) + ' binned by ' + string(nb_bins) + ' sorted by ' + string(name_test))
         
         
-        save(['data_' patient_number '_stats' ], 'fdiff', 'fchan', '-append')
+        save(['data_' patient_number '_' macro_name '_stats' ], 'fdiff', 'fchan', '-append')
 
     end
     pause
