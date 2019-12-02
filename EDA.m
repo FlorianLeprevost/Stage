@@ -1,26 +1,42 @@
 % simple data exploration
 % 
-% second part = tri des essais en fonctinos des ibi n+1 ou n-1 ou difference n+1 et n-1
+% tri des essais en fonctions des ibi n+1 ou n-1 ou difference n+1 et n-1
 	%utilise script get outliers
-    %rajoute les difference channels
     %pour chacune des 3 manière de trier, plot les channels, par bins
     %(nombre demandé au début)
-    %le programme s'arrete entre chacune des 3 manière de trier
+    %le programme pause entre chacune des 3 manière de trier
 %
 
 %V2 Florian Leprévost October 2019
 %florian.leprevost@gmail.com 
 
 
+%% select channels to keep
+pl=[]
+figure
+for n=1:length(data_final_average.label)
+    pl(n) = plot(data_final_average.time,data_final_average.avg(n,:))
+    hold on
+end
+legend(pl(:), data_final_average.label(:))
+
+%donner channel a garder
+chan_keep = input('Donner une LISTE des index (exemple :[2 4]) des channels à GARDER : ')
+labels = string(data_final_trials.label)
+labels = labels(chan_keep)
+for n=1:length(labels)
+    chan_cell{n} = char(labels(n))
+end
+
+cfg = []
+cfg.channel  = chan_cell
+clean_trials = ft_selectdata(cfg, data_final_trials)
+
 %% remove outliers
+%en supprimant les trials hors d'un interval de distribution de l'amplitude
+%de la reponse
 
-%en supprimant les trials hors d'un interval
-
-%get outliers
-clean_trials = data_final_trials;
-labels = string(data_final_trials.label);
-
-%remove sample index
+%remove sample index if still here
 rmv_ind=[]
 for n=1:(length(labels))
     if labels(n) ~= 'sampleindex'
