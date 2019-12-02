@@ -1,7 +1,5 @@
 % simple data exploration
 % 
-% first part = distribution of peaks
-    %assez basique
 % second part = tri des essais en fonctinos des ibi n+1 ou n-1 ou difference n+1 et n-1
 	%utilise script get outliers
     %rajoute les difference channels
@@ -13,33 +11,7 @@
 %V2 Florian Leprévost October 2019
 %florian.leprevost@gmail.com 
 
-%% use stats var (voir pipeline_florian) to plot distrbution of interval
-figure
-boxplot(transpose(stats.RR),'Labels', {'RR'})
-title('Distribution des intervalles RR')
 
-figure
-histogram(transpose(stats.RR))
-title('Distribution des intervalles RR')
-
-figure
-boxplot([transpose(stats.QR),transpose(stats.PR),transpose(stats.RT)],'Labels', {'QR', 'PR', 'RT'})
-title('Distribution des intervalles QR, PR et RT')
-
-figure
-histogram(transpose(stats.RT))
-hold on
-histogram(transpose(stats.PR))
-hold on
-histogram(transpose(stats.QR))
-title('Distribution des intervalles QR, PR et RT')
-
-%spectre RR
-figure
-plot(stats.x_spectre, stats.RR)
-
-
-pause
 %% remove outliers
 
 %en supprimant les trials hors d'un interval
