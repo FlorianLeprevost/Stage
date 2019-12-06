@@ -138,11 +138,24 @@ ibi_pre(bad_trials_ok) = []
 diff_ibi(bad_trials_ok) = []
 
 
+cfg=[]
+cfg.reref='yes'
+cfg.refmethod='bipolar'
+clean_trials = ft_preprocessing(cfg, clean_trials)
+
 %% last part = plot bined data by criterion
 nb_col =length(clean_trials.trial(1,1,:))
-
-
+labels = string(clean_trials.label)
+for n=1:length(labels)
+    labels_field{n} = strrep(labels{n}, '-', '_')
+end
 nb_bins = input('how many bins?')
+
+legends=[]
+for n=1:nb_bins
+    name_leg = 'part ' + string(n)+'/'+string(nb_bins)
+    legends = [legends name_leg]
+end
 name_test =[]
 for tri = 1:4
     if tri ==1
@@ -217,7 +230,7 @@ for tri = 1:4
             [pks, locs] = findpeaks(bin_sorted(n,:))
             [peak, lat] = max(pks)
             lat= locs(lat)
-            peaks_amp_lat.(field_name(1)).(char(labels_field{dip})) = [peak, lat]
+            peaks_amp_lat.(field_name).(char(labels_field{dip})){n} = [peak, lat]
         end
 % 
 %       plot superposed
@@ -226,6 +239,7 @@ for tri = 1:4
         plot(clean_trials.time, bin_sorted)
         title('All trials of ' + string(label) + ' binned by ' + string(nb_bins) + ' sorted by ' + string(name_test))
         xlim([-.2 .7])
+        legend(legends)
         
 %         figure(fdiff)
 %         subplot(length(labels),1,dip)
