@@ -5,10 +5,10 @@ for n=1:numel(f_names)
     for m=1:length(test_field_names)
         stats = peaks_amp_lat.(f_names{n}).(test_field_names{m})
         for p =1:numel(stats)
-            if(~isfile('test.csv'))
-                dlmwrite('test.csv', stats(p), 'delimiter', ',');
+            if(~isfile('peak_stats_better.csv'))
+                dlmwrite('peak_stats_better.csv', stats(p), 'delimiter', ',');
             else
-                dlmwrite('test.csv', stats(p), 'delimiter', ',', '-append');
+                dlmwrite('peak_stats_better.csv', stats(p), 'delimiter', ',', '-append');
             end
         end
     end

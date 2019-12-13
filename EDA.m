@@ -138,11 +138,6 @@ ibi_pre(bad_trials_ok) = []
 diff_ibi(bad_trials_ok) = []
 
 
-cfg=[]
-cfg.reref='yes'
-cfg.refmethod='bipolar'
-clean_trials = ft_preprocessing(cfg, clean_trials)
-
 %% last part = plot bined data by criterion
 nb_col =length(clean_trials.trial(1,1,:))
 labels = string(clean_trials.label)
@@ -226,12 +221,24 @@ for tri = 1:4
             bornem=bornep
         end
         
+        
+        
+        %stats peaks latency and amplitude
         for n=1:nb_bins
-            [pks, locs] = findpeaks(bin_sorted(n,:))
-            [peak, lat] = max(pks)
-            lat= locs(lat)
+            [pks_p, locs_p] = findpeaks(bin_sorted(n,:))
+            [pks_n, locs_n] = findpeaks(-bin_sorted(n,:))
+            if max(pks_p)> max(pks_n)
+                [peak, lat] = max(pks_p)
+                lat= locs_p(lat)
+            else
+                [peak, lat] = max(pks_n)
+                lat= locs_n(lat)
+            end
             peaks_amp_lat.(field_name).(char(labels_field{dip})){n} = [peak, lat]
-        end
+        end    
+        
+        
+       
 % 
 %       plot superposed
         figure(fchan)

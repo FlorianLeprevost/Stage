@@ -21,15 +21,16 @@
 %%
 
 %remplit les variables nécessaires pour l'extraction Read_iEEG
-macro_name ='PrCi'
-nb_plots = 4
-patient_number= '2476'
-recording_date='2017-04-07'
-recording_time = '14-45'
+macro_name ='F1a'
+nb_plots = 6
+patient_number= '2757'
+recording_date='2019-09-16'
+recording_time = '14-33'
 experiment = 'Rest'
 
+
 %idem pour le preprocessing
-sample_rate = 1000
+sample_rate = 1024
 low_pass = 40
 high_pass = 0.5
 
@@ -47,7 +48,7 @@ end
 data_1expe = Read_iEEG_data(patient_number, recording_date, recording_time, elec_name, experiment)
 f1 = figure;
 plot(data_1expe.time{1,1}, data_1expe.trial{1,1}(1:3,:))
-save(['data_' patient_number '_' macro_name], 'data_1expe')
+save(['data_' patient_number '_' macro_name], 'data_1expe', 'patient_number', 'macro_name', 'elec_name')
 
 
 %% rereference bipolar
@@ -78,7 +79,7 @@ cfg             = [];
 cfg.resamplefs      = sample_rate %frequency at which the data will be resampled (default = 256 Hz)
 cfg.detrend         = 'yes' %detrend the data prior to resampling 
 cfg.trials          = 'all'
-cfg.sampleindex     = 'yes'
+cfg.sampleindex     = 'no'
 data_3down_filt = ft_resampledata(cfg, data_filt)
 
 f2 = figure;
