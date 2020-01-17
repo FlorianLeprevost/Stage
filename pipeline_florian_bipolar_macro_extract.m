@@ -21,8 +21,8 @@
 %%
 
 %remplit les variables nécessaires pour l'extraction Read_iEEG
-macro_name ='F1a'
-nb_plots = 6
+macro_name ='PoCi'
+nb_plots = 4
 patient_number= '2757'
 recording_date='2019-09-16'
 recording_time = '14-33'
