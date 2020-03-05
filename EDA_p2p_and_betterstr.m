@@ -30,6 +30,7 @@ end
 
 cfg = []
 cfg.channel  = chan_cell
+cfg.latency=[-1 1]
 clean_trials = ft_selectdata(cfg, data_final_trials)
 
 %% remove outliers
@@ -125,6 +126,7 @@ for n=1:length(labels)
     plot(clean_trials.time, squeeze(clean_trials.trial(:,n,:)))
 end
 
+cd('Z:/modulation_HER_florian_2019/Data/2nd ana .5-30 and .05-.12 .3-.4')
 save(['data_' patient_number '_' macro_name '_stats' ], 'clean_trials','bad_trials_ok')
 
 %ET supprimer les trials outliers dans les info sur le coeur
@@ -199,10 +201,10 @@ for tri = 1:6
         sorted_var = sortrows(sorted_var,2);
     end
 
-%     %sort trials
-%     fchan = figure('Name', string(name_test))
-%     %fdiff= figure('Name', ['difference between bins' + string(name_test)])
-%     fcolor = figure('Name', ['colors' + string(name_test)])
+    %sort trials
+    fchan = figure('Name', string(name_test))
+    %fdiff= figure('Name', ['difference between bins' + string(name_test)])
+    fcolor = figure('Name', ['colors' + string(name_test)])
     
     for dip = 1:length(labels)
         channel = squeeze(clean_trials.trial(:,dip,:));
@@ -289,36 +291,35 @@ for tri = 1:6
        
 % 
 % %       plot superposed
-%         figure(fchan)
-%         subplot(length(labels),1,dip)
-%         
-%         colorspec = { [1 0 0] ;[.9 .3 0]; [1 .6 0] ;[1 .9 0]; [.9 .8 .3 ]; [.6 1 .4] ; [0 .8 .6] ; [0 .6 .9]};
-% 
-%         hold on
-%         for i = 1:nb_bins
-%           plot(clean_trials.time, bin_sorted(i, :), 'Color', colorspec{i}, 'LineWidth',1)
-%         end
-%         
-%         
-%         
-%         %plot(clean_trials.time, bin_sorted)
-%         title('All trials of ' + string(label) + ' binned by ' + string(nb_bins) + ' sorted by ' + string(name_test))
-%         xlim([0 .8])
-%         legend(legends)
+        figure(fchan)
+        subplot(length(labels),1,dip)
+        
+        colorspec = { [1 0 0] ;[.9 .3 0]; [1 .6 0] ;[1 .9 0]; [.9 .8 .3 ]; [.6 1 .4] ; [0 .8 .6] ; [0 .6 .9]};
+
+        hold on
+        for i = 1:nb_bins
+          plot(clean_trials.time, bin_sorted(i, :), 'Color', colorspec{i}, 'LineWidth',1)
+        end
+        
+            
+        plot(clean_trials.time, bin_sorted)
+        title('All trials of ' + string(label) + ' binned by ' + string(nb_bins) + ' sorted by ' + string(name_test))
+        xlim([0 .8])
+        legend(legends)
 %         
 % %         figure(fdiff)
 % %         subplot(length(labels),1,dip)
 % %         plot(data_final_trials.time, diff(bin_sorted))
 % %         xlim([-.2 .7])
-%         clims = [-20 20]
-%         figure(fcolor)
-%         subplot(length(labels),1,dip)
-%         imagesc(channel,clims)
-%         colormap(winter)
-%         title('All trials of ' + string(label) + ' sorted by ' + string(name_test))
-%         xlim([900 1800])
-%         set(gca,'XTick',[ 1000 1100 1200 1300 1400 1500 1600 1700 1800] ); %This are going to be the only values affected.
-%         set(gca,'XTickLabel',[0 .1 .2 .3 .4 .5 .6 .7 .8] ); %This is what it's going to appear in those places
+        clims = [-20 20]
+        figure(fcolor)
+        subplot(length(labels),1,dip)
+        imagesc(channel,clims)
+        colormap(winter)
+        title('All trials of ' + string(label) + ' sorted by ' + string(name_test))
+        xlim([900 1800])
+        set(gca,'XTick',[ 1000 1100 1200 1300 1400 1500 1600 1700 1800] ); %This are going to be the only values affected.
+        set(gca,'XTickLabel',[0 .1 .2 .3 .4 .5 .6 .7 .8] ); %This is what it's going to appear in those places
 % 
 %         %plot with offset
 % %         offset=5
@@ -329,8 +330,10 @@ for tri = 1:6
 % %         plot(data_final_trials.time, bin_plus_offset)
 %         %title('All trials of ' + string(label) + ' binned by ' + string(nb_bins) + ' sorted by ' + string(name_test))
 %         
-%         
-%         save(['data_' patient_number '_' macro_name '_stats' ], 'fchan', 'peaks_amp_lat', '-append')
+%       
+        saveas(fcolor, ['All trials of ' + string(label) + ' sorted by ' + string(name_test) + '.jpg'])
+        saveas(fchan, ['All trials of ' + string(label) + ' binned by ' + string(nb_bins) + ' sorted by ' + string(name_test) + '.jpg'])
+        save(['data_' patient_number '_' macro_name '_stats' ], 'peaks_amp_lat', '-append')
 
     end
 %

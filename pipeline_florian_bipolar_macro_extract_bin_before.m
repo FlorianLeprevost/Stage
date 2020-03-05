@@ -29,7 +29,6 @@ recording_time = '14-33'
 experiment = 'Rest'
 
 
-
 %idem pour le preprocessing
 sample_rate = 1024
 low_pass = 25
@@ -48,10 +47,7 @@ end
 % recup data dans une structure
 data_1expe = Read_iEEG_data(patient_number, recording_date, recording_time, elec_name, experiment)
 f1 = figure;
-plot(data_1expe.trial{1,1}(1:3,:))
-
-
-cd('Z:/modulation_HER_florian_2019/Data/2nd ana .5-30 and .05-.12 .3-.4')
+plot(data_1expe.time{1,1}, data_1expe.trial{1,1}(1:3,:))
 save(['data_' patient_number '_' macro_name], 'data_1expe', 'patient_number', 'macro_name', 'elec_name')
 
 
@@ -91,16 +87,26 @@ plot(data_3down_filt.time{1,1}, data_3down_filt.trial{1,1}(1,:))
 
 save(['data_' patient_number '_' macro_name], 'data_3down_filt', '-append')
 
+%% NEW BINAGE
+
+
+
+
+
+
+
+
 
 %% timelock signal on R peaks
 
+
 %redefine trials
 cfg=[]
-%cfg.trials ='all'   %= 'all' or a selection given as a 1xN vector (default = 'all')
+cfg.trials ='all'   %= 'all' or a selection given as a 1xN vector (default = 'all')
 cfg.trl = trl       %= Nx3 matrix with the trial definition, see FT_DEFINETRIAL
 data_4ok = ft_redefinetrial(cfg, data_3down_filt)
 
-%save(['data_' patient_number  '_' macro_name], 'data_4ok', '-append')
+save(['data_' patient_number  '_' macro_name], 'data_4ok', '-append')
 
 % time lock average 
 cfg=[]
@@ -113,18 +119,10 @@ cfg.keeptrials = 'no'               %= 'yes' or 'no', return individual trials o
 cfg.removemean = 'no'               %= 'no' or 'yes' for covariance computation (default = 'yes')
 
 [data_final_average] = ft_timelockanalysis(cfg, data_4ok)
-%save(['data_' patient_number  '_' macro_name], 'data_final_average', '-append')
+save(['data_' patient_number  '_' macro_name], 'data_final_average', '-append')
 f3 = figure
-plot(data_final_average.time, data_final_average.avg(:,:), 'LineWidth',1.5)
+plot(data_final_average.time, data_final_average.avg(:,:))
 title('Average of each channel')
-legend(data_final_average.label)
-xlabel("time in s", 'FontSize',20)
-ylabel("amplitude in µV", 'FontSize',20)
-ax = gca;
-ax.FontSize = 20
-xlim([-.1 .6])
-print('average', '-dpng', '-r600')
-
 
 % time lock trials 
 
@@ -138,15 +136,9 @@ cfg.keeptrials = 'yes'               %= 'yes' or 'no', return individual trials 
 cfg.removemean = 'no'               %= 'no' or 'yes' for covariance computation (default = 'yes')
 
 [data_final_trials] = ft_timelockanalysis(cfg, data_4ok)
-%save(['data_' patient_number  '_' macro_name], 'data_final_trials', '-append')
+save(['data_' patient_number  '_' macro_name], 'data_final_trials', '-append')
 data_final_trials.trial = squeeze(data_final_trials.trial)
 f4 = figure
-plot(data_final_trials.time, squeeze(data_final_trials.trial(1,:,:)), 'LineWidth',1)
+plot(data_final_trials.time, squeeze(data_final_trials.trial(1,:,:)))
 title('First trial of each channel')
-legend(data_final_average.label)
-xlabel("time in s", 'FontSize',20)
-ylabel("amplitude in µV", 'FontSize',20)
-ax = gca;
-ax.FontSize = 20
-print('1st trial', '-dpng', '-r600')
 

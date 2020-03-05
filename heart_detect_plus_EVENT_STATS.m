@@ -2,12 +2,12 @@
 %crée event et trl structures
 
 %% info a remplir pour l'extraction
-macro_name ='ECG1'
-patient_number= '2757'
-recording_date='2019-09-16'
-recording_time = '14-33'
+macro_name ='ECG3'
+patient_number= '2476'
+recording_date='2017-04-07'
+recording_time = '14-45'
 experiment = 'Rest'
-sample_rate=1024
+sample_rate=1000
 
 %% lance heart_peak_detect et crée event+trl file
 elec_name{1}=['0' patient_number '_' recording_date '_' recording_time '_' macro_name '.ncs']
@@ -133,12 +133,19 @@ intervals = stats.RR
 timestamps = stats.x_spectre
 IBI_timeseries = spline(timestamps, intervals, data_coeur_spectre.time{1});
 
-save('spectre_data', 'data_coeur_spectre', 'timestamps', 'intervals')
+save([patient_number '_spectre_data'], 'data_coeur_spectre', 'timestamps', 'intervals')
 
 %plot the IBI time series
-figure; plot(IBI_timeseries); xlabel('time'); ylabel('IBI'); title('interpolated IBI timeseries');
+figure; plot(IBI_timeseries); 
+xlabel('time','FontSize',20); 
+ylabel('IBI','FontSize',20); 
+title('interpolated IBI timeseries');
 
-save('spectre_data', 'IBI_timeseries', '-append')
+ax = gca;
+ax.FontSize = 20
+print('-r500','-djpeg','ibits.jpg');
+
+save([patient_number '_spectre_data'], 'IBI_timeseries', '-append')
 
 IBI_timeseries_resting = data_coeur_spectre;
 IBI_timeseries_resting.trial{:} = IBI_timeseries;
@@ -160,12 +167,18 @@ cfg.parameter   = 'powspctrm';
 cfg.title       = 'IBI time series power spectrum'
 ft_singleplotER(cfg, IBI_spectrum);
 ylim([0 2e-5])
+xlabel("Frequency (Hz)", 'FontSize',20)
+ylabel("power", 'FontSize',20)
+ax = gca;
+ax.FontSize = 20
+print('-r500','-djpeg','ibipowsprtm.jpg');
+
 save('spectre_data', 'IBI_spectrum', '-append')
 
 %% Filtering
 
 %filter low (0.04–0.15 Hz)
-LF_band = [0.04 0.15];
+LF_band = [0.04 0.12];
 LF_HRV_but2 = ft_preproc_bandpassfilter(IBI_timeseries_resting.trial{1}, sample_rate, LF_band, 2, 'but');
 % LF_HRV_fir5 = ft_preproc_bandpassfilter(IBI_timeseries_resting.trial{1}, sample_rate, LF_band, 5, 'fir');
 % LF_HRV_brickw1 = ft_preproc_bandpassfilter(IBI_timeseries_resting.trial{1}, sample_rate, LF_band, 1, 'brickwall');
@@ -233,7 +246,7 @@ LF_HRV_filt.trial{1} = LF_HRV_but2
 %% 
 %filter high (0.15–0.4 Hz) 
 
-HF_band = [0.15 0.4];
+HF_band = [0.3 0.4];
 HF_HRV_but2 = ft_preproc_bandpassfilter(IBI_timeseries_resting.trial{1}, sample_rate, HF_band, 2, 'but');
 % HF_HRV_fir5 = ft_preproc_bandpassfilter(IBI_timeseries_resting.trial{1}, sample_rate, HF_band, 5, 'fir');
 % HF_HRV_brickw1 = ft_preproc_bandpassfilter(IBI_timeseries_resting.trial{1}, sample_rate, HF_band, 1, 'brickwall');

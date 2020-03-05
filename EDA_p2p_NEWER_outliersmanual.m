@@ -56,7 +56,6 @@ for n=1:length(labels)
 end
 title('All trials')
 
-
 %transformation de la matric de chaque electrode en une seule colonne pour
 %mieux determiner la limite des outliers
 arrayed_channels ={};
@@ -65,40 +64,40 @@ for n=1:length(labels);
     arrayed_channels{n}=mat_chan(:);
 end
 
-%determiner l'interval
-for n=1:length(labels)
-    variance = nanvar(arrayed_channels{n})
-    moyenne = nanmean(arrayed_channels{n})
-    
-    ok = 0
-    outlier_lim = 0.001
-    disp(['current exclusion limit = '+ string(outlier_lim)])
-    while ok==0
-        figure
-        histogram(arrayed_channels{n}, 50)
-        title('distribution of amplitudes in ' + labels(n))
-        hold on
-        y= ylim;
-        CI = quantile(arrayed_channels{n},[outlier_lim/2 1-outlier_lim/2])
-        plot([CI(1) CI(1)], [y(1) y(2)])  
-        hold on
-        plot([CI(2) CI(2)], [y(1) y(2)])     
-        decision = input ('do you want to exclude trials outside this interval (0)?\n do you want to keep all trials ?(1)\n do you want to exclude trials outside a difference interval (answer your limit)?')
-        if decision == 0
-            ok=1
-        elseif decision == 1
-            break
-        else
-            outlier_lim=decision
-        end
-    end  
-end
+% %determiner l'interval
+% for n=1:length(labels)
+%     variance = nanvar(arrayed_channels{n})
+%     moyenne = nanmean(arrayed_channels{n})
+%     
+%     ok = 0
+%     outlier_lim = 0.001
+%     disp(['current exclusion limit = '+ string(outlier_lim)])
+%     while ok==0
+%         figure
+%         histogram(arrayed_channels{n}, 50)
+%         title('distribution of amplitudes in ' + labels(n))
+%         hold on
+%         y= ylim;
+%         CI = quantile(arrayed_channels{n},[outlier_lim/2 1-outlier_lim/2])
+%         plot([CI(1) CI(1)], [y(1) y(2)])  
+%         hold on
+%         plot([CI(2) CI(2)], [y(1) y(2)])     
+%         decision = input ('do you want to exclude trials outside this interval (0)?\n do you want to keep all trials ?(1)\n do you want to exclude trials outside a difference interval (answer your limit)?')
+%         if decision == 0
+%             ok=1
+%         elseif decision == 1
+%             break
+%         else
+%             outlier_lim=decision
+%         end
+%     end  
+% end
 
 
 %get outlier trials
 bad_trials = [ ]
-for n=1:length(labels)
-    CI = quantile(arrayed_channels{n},[outlier_lim/2 1-outlier_lim/2])
+% for n=1:length(labels)
+%     CI = quantile(arrayed_channels{n},[outlier_lim/2 1-outlier_lim/2])
     for tr = 1:length(clean_trials.trial(:,1,1))
         for sample=1:length(clean_trials.trial(1,1,:))
             %supprime le trial if condition pas respectée
@@ -109,7 +108,6 @@ for n=1:length(labels)
         end
     end
 disp(bad_trials)
-end
 
 %enleve doubles et sort
 bad_trials_ok = sort(unique(bad_trials))
@@ -118,16 +116,19 @@ bad_trials_ok = sort(unique(bad_trials))
 all_trials = 1:length(clean_trials.trial(:,1,1))
 good_trials = setdiff(all_trials,bad_trials_ok)
 
+
 cfg =[]
 cfg.trials= good_trials
-clean_trials = ft_selectdata(cfg, clean_trials)
+clean_trials= ft_selectdata(cfg, clean_trials)
 
 for n=1:length(labels)
     figure
     plot(clean_trials.time, squeeze(clean_trials.trial(:,n,:)))
+    xlabel("time in s", 'FontSize',20)
+    ylabel("amplitude in µV", 'FontSize',20)
 end
 
-cd('Z:/modulation_HER_florian_2019/Data/2nd ana .5-30 and .05-.12 .3-.4')
+cd('Z:/modulation_HER_florian_2019/Data/2nd ana bis')
 save(['data_' patient_number '_' macro_name '_stats' ], 'clean_trials','bad_trials_ok')
 
 %ET supprimer les trials outliers dans les info sur le coeur
@@ -150,8 +151,10 @@ end
 events_for_stats =  struct2table(event_ok)
 events_for_stats(bad_trials_ok,:) = []
 %% last part = plot bined data by criterion
+%pêak amp lat init
 nb_obs=0
 
+%init
 nb_col =length(clean_trials.trial(1,1,:))
 labels = string(clean_trials.label)
 for n=1:length(labels)
@@ -166,19 +169,19 @@ for n=1:nb_bins
 end
 name_test =[]
 
-%% skip this if you dont want all tests 
+%% skip this if you dont want all tests
 for tri = 1:6
     if tri ==1
         name_test = 'order of apparition'
         field_name = 'order'
     elseif tri == 2
-        var = transpose(ibi_post)
-        name_test = 'interval to Next IBI' 
-        field_name = 'next_ibi'       
-    elseif tri == 3
         var = transpose(ibi_pre)
         name_test = 'interval to Previous IBI'
-        field_name = 'prev_ibi'       
+        field_name = 'prev_ibi' 
+    elseif tri == 3
+        var = transpose(ibi_post)
+        name_test = 'interval to Next IBI'
+        field_name = 'next_ibi'
     elseif tri== 4
         var= transpose(diff_ibi)
         name_test = 'difference of previous and next interval '
@@ -192,12 +195,9 @@ for tri = 1:6
         name_test = 'high feq hilbert amplitude'
         field_name = 'hil_amp_high'
     end
-    
-    
 % if you want only 1 "tri" , set tri, name_test & field name, and then launch this cell
-
     if tri ~= 1
-    %sort by var
+    %sort by var and get an index to use for electrodes afterwards
         var(:,2) = 1:length(var)
         sorted_var = sortrows(var);
         sorted_var(:,3) = 1:length(var);
@@ -207,8 +207,8 @@ for tri = 1:6
     %sort trials
     fchan = figure('Name', string(name_test))
     %fdiff= figure('Name', ['difference between bins' + string(name_test)])
-% %     fcolor = figure('Name', ['colors' + string(name_test)])
-%     
+%     fcolor = figure('Name', ['colors' + string(name_test)])
+    
     for dip = 1:length(labels)
         channel = squeeze(clean_trials.trial(:,dip,:));
         label =labels(dip);
@@ -234,7 +234,14 @@ for tri = 1:6
             channel(:,nb_col+1:nb_col+3)=[];
         end
         
+        
+        
+        
+        
         %bin data
+        %stats heart
+        events_for_stats = sortrows(events_for_stats, 6+tri)
+        
         bornem = 1
         bornep=1
         bin_size = round(length(channel(:,1))/nb_bins)
@@ -250,70 +257,50 @@ for tri = 1:6
             heart_stats(n).diff = mean(table2array(events_for_stats(bornem:bornep,10)))
             heart_stats(n).LF = mean(table2array(events_for_stats(bornem:bornep,11)))
             heart_stats(n).HF = mean(table2array(events_for_stats(bornem:bornep,12)))
-            
+                   
             bornem=bornep
+   
         end
         
         
         
-        %stats peaks latency and amplitude      
-        %       P250     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%P250
-        
+        %stats peaks latency and amplitude
         for n=1:nb_bins
-            [pks_p, locs_p] = findpeaks(bin_sorted(n,1260:1340))
-            [peak, lat] = max(pks_p)
-            lat= locs_p(lat)
-
-            %find previous peak
-            [pre_peak, pre_lat] = findpeaks(-bin_sorted(n,1:lat+1260))
-            pre_lat = pre_lat(length(pre_lat))
-            pre_peak= pre_peak(length(pre_peak))                
-        
+            [pks_p, locs_p] = findpeaks(bin_sorted(n,1000:1500))
+            [pks_n, locs_n] = findpeaks(-bin_sorted(n,1000:1500))
+            if max(pks_p)> max(pks_n)
+                [peak, lat] = max(pks_p)
+                lat= locs_p(lat)
+                
+                %find previous peak
+                [pre_peak, pre_lat] = findpeaks(-bin_sorted(n,1:lat+1000))
+                pre_lat = pre_lat(length(pre_lat))
+                pre_peak= pre_peak(length(pre_peak))
+                pre_peak=-pre_peak
+                
+            else
+                [peak, lat] = max(pks_n)
+                lat= locs_n(lat)
+                peak=-peak
+                
+                %find previous peak
+                [pre_peak, pre_lat] = findpeaks(bin_sorted(n,1:lat+1000))
+                pre_lat = pre_lat(length(pre_lat))
+                pre_peak= pre_peak(length(pre_peak))
+            end
+                      
+            
             nb_obs=nb_obs+1
             
             peaks_amp_lat(nb_obs).var_tri = field_name
             peaks_amp_lat(nb_obs).electrodes = char(labels_field{dip})
             peaks_amp_lat(nb_obs).bin = n
-            peaks_amp_lat(nb_obs).peak = 'P250'          
             peaks_amp_lat(nb_obs).amplitude = peak
-            peaks_amp_lat(nb_obs).latence = clean_trials.time(lat+1260)
-            peaks_amp_lat(nb_obs).prev_amp = -pre_peak
-            peaks_amp_lat(nb_obs).prev_lat = clean_trials.time(pre_lat)
-            peaks_amp_lat(nb_obs).p2p_amp = peak + pre_peak
-            peaks_amp_lat(nb_obs).p2p_lat = clean_trials.time(lat+1260)- clean_trials.time(pre_lat)
-            
-            peaks_amp_lat(nb_obs).mean_pre = heart_stats(n).pre
-            peaks_amp_lat(nb_obs).mean_post = heart_stats(n).post
-            peaks_amp_lat(nb_obs).mean_diff = heart_stats(n).diff
-            peaks_amp_lat(nb_obs).mean_LF = heart_stats(n).LF
-            peaks_amp_lat(nb_obs).mean_HF = heart_stats(n).HF
-            
-
-        end   
-        
-        % N300    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%N300
-        for n=1:nb_bins
-            [pks_n, locs_n] = findpeaks(-bin_sorted(n,1292:1372))
-            [peak, lat] = max(pks_n)
-            lat= locs_n(lat)
-
-            %find previous peak
-            [pre_peak, pre_lat] = findpeaks(bin_sorted(n,1:lat+1292))
-            pre_lat = pre_lat(length(pre_lat))
-            pre_peak= pre_peak(length(pre_peak))
-                                           
-            nb_obs=nb_obs+1
-            
-            peaks_amp_lat(nb_obs).var_tri = field_name
-            peaks_amp_lat(nb_obs).electrodes = char(labels_field{dip})
-            peaks_amp_lat(nb_obs).bin = n
-            peaks_amp_lat(nb_obs).peak = 'N300' 
-            peaks_amp_lat(nb_obs).amplitude = -peak
-            peaks_amp_lat(nb_obs).latence = clean_trials.time(lat+1292)
+            peaks_amp_lat(nb_obs).latence = clean_trials.time(lat+1000)
             peaks_amp_lat(nb_obs).prev_amp = pre_peak
             peaks_amp_lat(nb_obs).prev_lat = clean_trials.time(pre_lat)
-            peaks_amp_lat(nb_obs).p2p_amp = -peak - pre_peak
-            peaks_amp_lat(nb_obs).p2p_lat = clean_trials.time(lat+1292)- clean_trials.time(pre_lat)
+            peaks_amp_lat(nb_obs).p2p_amp = peak - pre_peak
+            peaks_amp_lat(nb_obs).p2p_lat = clean_trials.time(lat+1000)- clean_trials.time(pre_lat)
             
             peaks_amp_lat(nb_obs).mean_pre = heart_stats(n).pre
             peaks_amp_lat(nb_obs).mean_post = heart_stats(n).post
@@ -321,26 +308,36 @@ for tri = 1:6
             peaks_amp_lat(nb_obs).mean_LF = heart_stats(n).LF
             peaks_amp_lat(nb_obs).mean_HF = heart_stats(n).HF
             
-        end   
-    
-%        
+
+        end    
+        
+        
+       
+% % % % % 
+% %       plot superposed
         figure(fchan)
-        subplot(length(labels),1,dip)       
-        colorspec = { [1 0 0] ;[.9 .3 0]; [1 .6 0] ;[1 .9 0]; [.9 .8 .3 ]; [.6 1 .4] ; [0 .8 .6] ; [0 .6 .9]};
+        subplot(length(labels),1,dip)
+        
+        %[.6 1 .4] ; [0 .8 .6] ; [0 .6 .9]
+        colorspec = { [1 0 0] ;[.9 .3 0]; [1 .6 0] ;[1 .9 0]; [.9 .8 .3 ]};
+
         hold on
         for i = 1:nb_bins
           plot(clean_trials.time, bin_sorted(i, :), 'Color', colorspec{i}, 'LineWidth',1)
         end
-        
-        title('All trials of ' + string(label) + ' binned by ' + string(nb_bins) + ' sorted by ' + string(name_test))
-        xlim([-0.1 .6])
-        legend(legends)
-        
         xlabel("time in s", 'FontSize',10)
         ylabel("amplitude in µV", 'FontSize',10)
-        ax = gca;
-        ax.FontSize = 10
-% %         
+        
+        
+        
+        title('All trials of ' + string(label) + ' binned by ' + string(nb_bins) + ' sorted by ' + string(name_test), 'FontSize',10)
+        xlim([0 .8])
+        legend(legends)
+% % % % %         
+% % % % % %         figure(fdiff)
+% % % % % %         subplot(length(labels),1,dip)
+% % % % % %         plot(data_final_trials.time, diff(bin_sorted))
+% % % % % %         xlim([-.2 .7])
 % % % %         clims = [-20 20]
 % % % %         figure(fcolor)
 % % % %         subplot(length(labels),1,dip)
@@ -348,9 +345,19 @@ for tri = 1:6
 % % % %         colormap(winter)
 % % % %         title('All trials of ' + string(label) + ' sorted by ' + string(name_test))
 % % % %         xlim([900 1800])
-% % % %         set(gca,'XTick',[900 1000 1100 1200 1300 1400 1500 1600 1700] ); %This are going to be the only values affected.
-% % % %         set(gca,'XTickLabel',[-0.1 0 .1 .2 .3 .4 .5 .6 .7] ); %This is what it's going to appear in those places   
-% % % %         
+% % % %         set(gca,'XTick',[ 1000 1100 1200 1300 1400 1500 1600 1700 1800] ); %This are going to be the only values affected.
+% % % %         set(gca,'XTickLabel',[0 .1 .2 .3 .4 .5 .6 .7 .8] ); %This is what it's going to appear in those places
+% % % % % 
+% % % % %         %plot with offset
+% % % % % %         offset=5
+% % % % % %         offset_vector = (offset:offset:nb_bins*offset)';
+% % % % % %         bin_plus_offset = bsxfun(@plus,bin_sorted,offset_vector);
+% % % % % %         subplot(3,2,3:6)
+% % % % % %         subplot(length(trials_str),1,dip)
+% % % % % %         plot(data_final_trials.time, bin_plus_offset)
+% % % % %         %title('All trials of ' + string(label) + ' binned by ' + string(nb_bins) + ' sorted by ' + string(name_test))
+% % % % %         
+% % % % %       
 % % % %         saveas(fcolor, ['All trials of ' + string(label) + ' sorted by ' + string(name_test) + '.jpg'])
         saveas(fchan, ['All trials of ' + string(label) + ' binned by ' + string(nb_bins) + ' sorted by ' + string(name_test) + '.jpg'])
         save(['data_' patient_number '_' macro_name '_stats' ], 'peaks_amp_lat', '-append')
@@ -360,3 +367,5 @@ for tri = 1:6
 end
 
 save(['data_' patient_number '_' macro_name '_peaks' ], 'peaks_amp_lat')
+
+

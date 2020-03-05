@@ -128,7 +128,7 @@ for n=1:length(labels)
 end
 
 cd('Z:/modulation_HER_florian_2019/Data/2nd ana .5-30 and .05-.12 .3-.4')
-save(['data_' patient_number '_' macro_name '_stats' ], 'clean_trials','bad_trials_ok')
+save(['data_' patient_number '_' macro_name '34_stats' ], 'clean_trials','bad_trials_ok')
 
 %ET supprimer les trials outliers dans les info sur le coeur
 ibi_post = [event_ok.interval_post]
@@ -147,8 +147,7 @@ try
     hil_amp_high(bad_trials_ok) = []
 end
 
-events_for_stats =  struct2table(event_ok)
-events_for_stats(bad_trials_ok,:) = []
+
 %% last part = plot bined data by criterion
 nb_obs=0
 
@@ -207,7 +206,7 @@ for tri = 1:6
     %sort trials
     fchan = figure('Name', string(name_test))
     %fdiff= figure('Name', ['difference between bins' + string(name_test)])
-% %     fcolor = figure('Name', ['colors' + string(name_test)])
+    fcolor = figure('Name', ['colors' + string(name_test)])
 %     
     for dip = 1:length(labels)
         channel = squeeze(clean_trials.trial(:,dip,:));
@@ -244,13 +243,6 @@ for tri = 1:6
                 bornep=length(channel(:,1))
             end
             bin_sorted(n,:) = mean(channel(bornem:bornep,:))
-            
-            heart_stats(n).pre = mean(table2array(events_for_stats(bornem:bornep,8)))
-            heart_stats(n).post = mean(table2array(events_for_stats(bornem:bornep,9)))
-            heart_stats(n).diff = mean(table2array(events_for_stats(bornem:bornep,10)))
-            heart_stats(n).LF = mean(table2array(events_for_stats(bornem:bornep,11)))
-            heart_stats(n).HF = mean(table2array(events_for_stats(bornem:bornep,12)))
-            
             bornem=bornep
         end
         
@@ -260,12 +252,12 @@ for tri = 1:6
         %       P250     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%P250
         
         for n=1:nb_bins
-            [pks_p, locs_p] = findpeaks(bin_sorted(n,1260:1340))
+            [pks_p, locs_p] = findpeaks(-bin_sorted(n,1260:1320))
             [peak, lat] = max(pks_p)
             lat= locs_p(lat)
 
             %find previous peak
-            [pre_peak, pre_lat] = findpeaks(-bin_sorted(n,1:lat+1260))
+            [pre_peak, pre_lat] = findpeaks(bin_sorted(n,1:lat+1270))
             pre_lat = pre_lat(length(pre_lat))
             pre_peak= pre_peak(length(pre_peak))                
         
@@ -274,31 +266,25 @@ for tri = 1:6
             peaks_amp_lat(nb_obs).var_tri = field_name
             peaks_amp_lat(nb_obs).electrodes = char(labels_field{dip})
             peaks_amp_lat(nb_obs).bin = n
-            peaks_amp_lat(nb_obs).peak = 'P250'          
-            peaks_amp_lat(nb_obs).amplitude = peak
-            peaks_amp_lat(nb_obs).latence = clean_trials.time(lat+1260)
-            peaks_amp_lat(nb_obs).prev_amp = -pre_peak
+            peaks_amp_lat(nb_obs).peak = 'N250'          
+            peaks_amp_lat(nb_obs).amplitude = -peak
+            peaks_amp_lat(nb_obs).latence = clean_trials.time(lat+1270)
+            peaks_amp_lat(nb_obs).prev_amp = pre_peak
             peaks_amp_lat(nb_obs).prev_lat = clean_trials.time(pre_lat)
-            peaks_amp_lat(nb_obs).p2p_amp = peak + pre_peak
-            peaks_amp_lat(nb_obs).p2p_lat = clean_trials.time(lat+1260)- clean_trials.time(pre_lat)
-            
-            peaks_amp_lat(nb_obs).mean_pre = heart_stats(n).pre
-            peaks_amp_lat(nb_obs).mean_post = heart_stats(n).post
-            peaks_amp_lat(nb_obs).mean_diff = heart_stats(n).diff
-            peaks_amp_lat(nb_obs).mean_LF = heart_stats(n).LF
-            peaks_amp_lat(nb_obs).mean_HF = heart_stats(n).HF
+            peaks_amp_lat(nb_obs).p2p_amp = -peak - pre_peak
+            peaks_amp_lat(nb_obs).p2p_lat = clean_trials.time(lat)- clean_trials.time(pre_lat)
             
 
         end   
         
         % N300    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%N300
         for n=1:nb_bins
-            [pks_n, locs_n] = findpeaks(-bin_sorted(n,1292:1372))
+            [pks_n, locs_n] = findpeaks(bin_sorted(n,1292:1372))
             [peak, lat] = max(pks_n)
             lat= locs_n(lat)
 
             %find previous peak
-            [pre_peak, pre_lat] = findpeaks(bin_sorted(n,1:lat+1292))
+            [pre_peak, pre_lat] = findpeaks(-bin_sorted(n,1:lat+1292))
             pre_lat = pre_lat(length(pre_lat))
             pre_peak= pre_peak(length(pre_peak))
                                            
@@ -307,20 +293,15 @@ for tri = 1:6
             peaks_amp_lat(nb_obs).var_tri = field_name
             peaks_amp_lat(nb_obs).electrodes = char(labels_field{dip})
             peaks_amp_lat(nb_obs).bin = n
-            peaks_amp_lat(nb_obs).peak = 'N300' 
-            peaks_amp_lat(nb_obs).amplitude = -peak
+            peaks_amp_lat(nb_obs).peak = 'P300' 
+            peaks_amp_lat(nb_obs).amplitude = peak
             peaks_amp_lat(nb_obs).latence = clean_trials.time(lat+1292)
-            peaks_amp_lat(nb_obs).prev_amp = pre_peak
+            peaks_amp_lat(nb_obs).prev_amp = -pre_peak
             peaks_amp_lat(nb_obs).prev_lat = clean_trials.time(pre_lat)
-            peaks_amp_lat(nb_obs).p2p_amp = -peak - pre_peak
-            peaks_amp_lat(nb_obs).p2p_lat = clean_trials.time(lat+1292)- clean_trials.time(pre_lat)
+            peaks_amp_lat(nb_obs).p2p_amp = peak + pre_peak
+            peaks_amp_lat(nb_obs).p2p_lat = clean_trials.time(lat)- clean_trials.time(pre_lat)
             
-            peaks_amp_lat(nb_obs).mean_pre = heart_stats(n).pre
-            peaks_amp_lat(nb_obs).mean_post = heart_stats(n).post
-            peaks_amp_lat(nb_obs).mean_diff = heart_stats(n).diff
-            peaks_amp_lat(nb_obs).mean_LF = heart_stats(n).LF
-            peaks_amp_lat(nb_obs).mean_HF = heart_stats(n).HF
-            
+
         end   
     
 %        
@@ -331,32 +312,26 @@ for tri = 1:6
         for i = 1:nb_bins
           plot(clean_trials.time, bin_sorted(i, :), 'Color', colorspec{i}, 'LineWidth',1)
         end
-        
         title('All trials of ' + string(label) + ' binned by ' + string(nb_bins) + ' sorted by ' + string(name_test))
         xlim([-0.1 .6])
         legend(legends)
-        
-        xlabel("time in s", 'FontSize',10)
-        ylabel("amplitude in µV", 'FontSize',10)
-        ax = gca;
-        ax.FontSize = 10
 % %         
-% % % %         clims = [-20 20]
-% % % %         figure(fcolor)
-% % % %         subplot(length(labels),1,dip)
-% % % %         imagesc(channel,clims)
-% % % %         colormap(winter)
-% % % %         title('All trials of ' + string(label) + ' sorted by ' + string(name_test))
-% % % %         xlim([900 1800])
-% % % %         set(gca,'XTick',[900 1000 1100 1200 1300 1400 1500 1600 1700] ); %This are going to be the only values affected.
-% % % %         set(gca,'XTickLabel',[-0.1 0 .1 .2 .3 .4 .5 .6 .7] ); %This is what it's going to appear in those places   
-% % % %         
-% % % %         saveas(fcolor, ['All trials of ' + string(label) + ' sorted by ' + string(name_test) + '.jpg'])
+        clims = [-20 20]
+        figure(fcolor)
+        subplot(length(labels),1,dip)
+        imagesc(channel,clims)
+        colormap(winter)
+        title('All trials of ' + string(label) + ' sorted by ' + string(name_test))
+        xlim([900 1800])
+        set(gca,'XTick',[900 1000 1100 1200 1300 1400 1500 1600 1700] ); %This are going to be the only values affected.
+        set(gca,'XTickLabel',[-0.1 0 .1 .2 .3 .4 .5 .6 .7] ); %This is what it's going to appear in those places   
+        
+        saveas(fcolor, ['All trials of ' + string(label) + ' sorted by ' + string(name_test) + '.jpg'])
         saveas(fchan, ['All trials of ' + string(label) + ' binned by ' + string(nb_bins) + ' sorted by ' + string(name_test) + '.jpg'])
-        save(['data_' patient_number '_' macro_name '_stats' ], 'peaks_amp_lat', '-append')
+        save(['data_' patient_number '_' macro_name '34_stats' ], 'peaks_amp_lat', '-append')
 
     end
-%
+	pause
 end
 
-save(['data_' patient_number '_' macro_name '_peaks' ], 'peaks_amp_lat')
+save(['data_' patient_number '_' macro_name '34_peaks' ], 'peaks_amp_lat')
